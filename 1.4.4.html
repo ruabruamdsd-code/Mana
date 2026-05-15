@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard - Professional Edit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 300px;
+            --primary: #4361ee;
+            --bg-main: #f8f9fc;
+            --white: #ffffff;
+            --danger: #ef4444;
+            --dark-blue: #2e3b4e;
+            --edit-color: #f59e0b;
+        }
+
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: var(--bg-main); 
+            margin: 0; display: flex; min-height: 100vh;
+        }
+
+        /* Sidebar & Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--white);
+            border-right: 1px solid #e3e6f0;
+            padding: 30px 20px;
+            position: fixed; height: 100vh; overflow-y: auto;
+            z-index: 100;
+        }
+
+        .admin-section { margin-bottom: 25px; }
+        .admin-section h3 { font-size: 13px; color: #858796; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 12px; margin-bottom: 4px; font-weight: 600; }
+        input, select {
+            width: 100%; padding: 10px; border: 1px solid #d1d3e2; border-radius: 8px; outline: none; transition: 0.2s;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #324bbd; }
+
+        /* Main Content Area */
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; }
+
+        #alert-summary {
+            display: none; background: #fff1f2; border-left: 5px solid var(--danger);
+            padding: 15px; border-radius: 10px; margin-bottom: 30px; color: var(--danger); font-weight: 600;
+        }
+
+        /* Shelf Layout */
+        .shelf-block { margin-bottom: 40px; }
+        .shelf-header { 
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 2px solid #e3e6f0; margin-bottom: 20px; padding-bottom: 10px; 
+        }
+
+        .shelf-title { 
+            font-size: 18px; font-weight: bold; color: var(--dark-blue); 
+            cursor: pointer; padding: 4px 10px; border-radius: 6px; transition: 0.2s;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .shelf-title:hover { background: #eef2ff; color: var(--primary); }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+
+        /* Item Card Style */
+        .card {
+            background: var(--white); border-radius: 15px; padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07); position: relative; border-top: 4px solid var(--primary);
+            transition: 0.2s;
+        }
+        .card.low-stock-alert { border-top-color: var(--danger); background: #fffafb; }
+        
+        .alert-badge {
+            background: var(--danger); color: white; font-size: 10px; padding: 2px 8px;
+            border-radius: 10px; position: absolute; top: 15px; right: 15px;
+        }
+
+        .item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+        .item-name-text { font-weight: bold; font-size: 16px; color: var(--dark-blue); max-width: 80%; }
+        
+        .btn-edit-name { 
+            background: none; border: none; cursor: pointer; color: var(--edit-color); font-size: 14px; padding: 0;
+            opacity: 0.6; transition: 0.2s;
+        }
+        .btn-edit-name:hover { opacity: 1; transform: scale(1.1); }
+
+        .qty-input-container {
+            margin-top: 15px; background: #f8f9fc; padding: 12px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        
+        .direct-qty-input {
+            width: 80px; padding: 6px; border: 2px solid #d1d3e2; border-radius: 8px;
+            font-size: 18px; font-weight: 700; text-align: center; color: var(--primary);
+        }
+        .input-low { border-color: var(--danger) !important; color: var(--danger) !important; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .footer-actions { margin-top: 15px; display: flex; gap: 10px; border-top: 1px solid #f1f5f9; padding-top: 10px; }
+        .btn-sm { border: none; background: none; font-size: 12px; cursor: pointer; color: #858796; text-decoration: underline; }
+        .btn-sm-danger:hover { color: var(--danger); }
+
+        @media (max-width: 992px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { margin-left: 0; padding: 20px; }
+            body { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2 style="color:var(--primary)">📦 Inventory System</h2>
+        
+        <div class="admin-section">
+            <h3>+ เพิ่มชั้นวาง</h3>
+            <input type="text" id="new-shelf-name" placeholder="ชื่อชั้นวางใหม่...">
+            <button class="btn btn-primary" style="margin-top:8px" onclick="addShelf()">สร้างชั้นวาง</button>
+        </div>
+
+        <div class="admin-section">
+            <h3>+ เพิ่มรายการพัสดุ</h3>
+            <div class="input-group">
+                <label>ชั้นวาง</label>
+                <select id="select-shelf"></select>
+            </div>
+            <div class="input-group">
+                <label>ชื่อพัสดุ/อะไหล่</label>
+                <input type="text" id="item-name">
+            </div>
+            <div class="input-group">
+                <label>จำนวน</label>
+                <input type="number" id="item-qty" value="0">
+            </div>
+            <div class="input-group">
+                <label>จุดแจ้งเตือน (เหลือน้อยกว่า)</label>
+                <input type="number" id="item-threshold" value="100">
+            </div>
+            <div class="input-group">
+                <label>หน่วย</label>
+                <input type="text" id="item-unit" placeholder="ตัว, แผ่น, ลิตร...">
+            </div>
+            <button class="btn btn-primary" onclick="addItem()">บันทึกพัสดุ</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="alert-summary"></div>
+        <div class="header-top">
+            <h1>จัดการสต็อกวัสดุอุปกรณ์</h1>
+            <p id="time-status" style="color:#858796; margin: 5px 0;"></p>
+            <div style="display: flex; gap: 15px; font-size: 12px; margin-top: 10px;">
+                <span style="color: var(--primary)">● คลิกชื่อชั้นวางเพื่อแก้ไขหัวข้อ</span>
+                <span style="color: var(--edit-color)">● คลิก ✎ เพื่อแก้ไขชื่อพัสดุ</span>
+            </div>
+        </div>
+
+        <div id="inventory-root"></div>
+    </div>
+
+<script>
+    let db = {
+        "ชั้น A: อะไหล่หม้อแปลง": [
+            { name: "ซีลยางฝาถัง", qty: 120, unit: "แผ่น", threshold: 100 },
+            { name: "น็อตตัวเมีย M12", qty: 45, unit: "ตัว", threshold: 100 }
+        ]
+    };
+
+    function render() {
+        const root = document.getElementById('inventory-root');
+        const select = document.getElementById('select-shelf');
+        const alertSum = document.getElementById('alert-summary');
+        root.innerHTML = ''; select.innerHTML = '';
+
+        let lowStockItems = [];
+
+        Object.keys(db).forEach(shelfName => {
+            let opt = document.createElement('option');
+            opt.value = shelfName; opt.textContent = shelfName;
+            select.appendChild(opt);
+
+            const section = document.createElement('div');
+            section.className = 'shelf-block';
+            
+            let itemsHtml = '';
+            db[shelfName].forEach((item, idx) => {
+                const isLow = item.qty < item.threshold;
+                if(isLow) lowStockItems.push(item.name);
+
+                itemsHtml += `
+                <div class="card ${isLow ? 'low-stock-alert' : ''}">
+                    ${isLow ? `<span class="alert-badge">⚠️ สินค้าใกล้หมด</span>` : ''}
+                    
+                    <div class="item-header">
+                        <span class="item-name-text">${item.name}</span>
+                        <button class="btn-edit-name" onclick="editItemName('${shelfName}', ${idx})" title="แก้ไขชื่อพัสดุ">✎</button>
+                    </div>
+                    
+                    <span style="font-size:12px; color:#858796">แจ้งเตือนที่: < ${item.threshold} ${item.unit}</span>
+                    
+                    <div class="qty-input-container">
+                        <span style="font-size:13px; font-weight:600">คงเหลือ:</span>
+                        <div>
+                            <input type="number" 
+                                   class="direct-qty-input ${isLow ? 'input-low' : ''}" 
+                                   value="${item.qty}" 
+                                   onchange="updateQtyManual('${shelfName}', ${idx}, this.value)"
+                            >
+                            <span style="font-weight:600; font-size:14px; margin-left:5px">${item.unit}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-actions">
+                        <button class="btn-sm btn-sm-danger" onclick="deleteItem('${shelfName}', ${idx})">ลบรายการ</button>
+                    </div>
+                </div>`;
+            });
+
+            section.innerHTML = `
+                <div class="shelf-header">
+                    <div class="shelf-title" onclick="editShelfTitle('${shelfName}')">
+                        ${shelfName}
+                    </div>
+                    ${db[shelfName].length === 0 ? `<button class="btn-sm" style="color:var(--danger)" onclick="deleteShelf('${shelfName}')">ลบชั้นวางนี้</button>` : ''}
+                </div>
+                <div class="grid">${itemsHtml || '<p style="color:#858796; padding-left:10px;">ไม่มีพัสดุในชั้นนี้</p>'}</div>
+            `;
+            root.appendChild(section);
+        });
+
+        if(lowStockItems.length > 0) {
+            alertSum.style.display = 'block';
+            alertSum.innerHTML = `⚠️ พบรายการต้องสั่งซื้อเพิ่ม: ${lowStockItems.join(', ')}`;
+        } else {
+            alertSum.style.display = 'none';
+        }
+    }
+
+    // --- ฟังก์ชันแก้ไขชื่อพัสดุ ---
+    function editItemName(shelf, index) {
+        const oldName = db[shelf][index].name;
+        const newName = prompt("แก้ไขชื่อพัสดุ:", oldName);
+        if (newName && newName.trim() !== "" && newName !== oldName) {
+            db[shelf][index].name = newName.trim();
+            render();
+        }
+    }
+
+    // --- ฟังก์ชันแก้ไขชื่อชั้นวาง ---
+    function editShelfTitle(oldName) {
+        const newName = prompt("แก้ไขชื่อชั้นวาง / หัวข้อ:", oldName);
+        if (newName && newName.trim() !== "" && newName !== oldName) {
+            if (db[newName]) { alert("ชื่อชั้นวางนี้มีอยู่แล้ว"); return; }
+            db[newName.trim()] = db[oldName];
+            delete db[oldName];
+            render();
+        }
+    }
+
+    function updateQtyManual(shelf, index, newValue) {
+        const val = parseInt(newValue);
+        db[shelf][index].qty = isNaN(val) ? 0 : val;
+        render();
+    }
+
+    function addShelf() {
+        const name = document.getElementById('new-shelf-name').value.trim();
+        if(name && !db[name]) { 
+            db[name] = []; 
+            document.getElementById('new-shelf-name').value = '';
+            render(); 
+        }
+    }
+
+    function addItem() {
+        const shelf = document.getElementById('select-shelf').value;
+        const name = document.getElementById('item-name').value.trim();
+        const qty = parseInt(document.getElementById('item-qty').value) || 0;
+        const threshold = parseInt(document.getElementById('item-threshold').value) || 100;
+        const unit = document.getElementById('item-unit').value || 'หน่วย';
+
+        if(shelf && name) {
+            db[shelf].push({ name, qty, unit, threshold });
+            document.getElementById('item-name').value = '';
+            render();
+        }
+    }
+
+    function deleteItem(s, i) { if(confirm('ยืนยันลบรายการนี้?')) { db[s].splice(i, 1); render(); } }
+    function deleteShelf(name) { if(confirm(`ลบชั้นวาง "${name}"?`)) { delete db[name]; render(); } }
+
+    document.getElementById('time-status').innerText = "ข้อมูลอัปเดตเมื่อ: " + new Date().toLocaleString('th-TH');
+
+    render();
+</script>
+</body>
+</html>
