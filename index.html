@@ -98,4 +98,367 @@
 
         .qty-input-container {
             margin-top: 15px; background: #f8f9fc; padding: 12px; border-radius: 10px;
-... (364 บรรทัด)
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        
+        .direct-qty-input {
+            width: 90px; padding: 6px; border: 2px solid #d1d3e2; border-radius: 8px;
+            font-size: 18px; font-weight: 700; text-align: center; color: var(--primary);
+        }
+        .input-low { border-color: var(--danger) !important; color: var(--danger) !important; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .footer-actions { margin-top: 15px; display: flex; gap: 10px; border-top: 1px solid #f1f5f9; padding-top: 10px; }
+        .btn-sm { border: none; background: none; font-size: 12px; cursor: pointer; color: #858796; text-decoration: underline; padding: 0; }
+        .btn-sm-danger:hover { color: var(--danger); }
+
+        @media (max-width: 992px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { margin-left: 0; padding: 20px; }
+            body { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2 style="color:var(--primary)">📦 Inventory System</h2>
+        
+        <div class="admin-section">
+            <h3>+ เพิ่มชั้นวาง</h3>
+            <input type="text" id="new-shelf-name" placeholder="ตัวอย่าง: ชั้น B, ชั้น C...">
+            <button class="btn btn-primary" style="margin-top:8px" id="btn-add-shelf">สร้างชั้นวาง</button>
+        </div>
+
+        <div class="admin-section">
+            <h3>+ เพิ่มรายการพัสดุ</h3>
+            <div class="input-group">
+                <label>เลือกชั้นวาง</label>
+                <select id="select-shelf"></select>
+            </div>
+            <div class="input-group">
+                <label>ชื่อพัสดุ/อะไหล่</label>
+                <input type="text" id="item-name">
+            </div>
+            <div class="input-group">
+                <label>รหัสวัสดุ</label>
+                <input type="text" id="item-code" placeholder="ตัวอย่าง: MAT-001">
+            </div>
+            <div class="input-group">
+                <label>จำนวน</label>
+                <input type="number" id="item-qty" value="0">
+            </div>
+            <div class="input-group">
+                <label>จุดแจ้งเตือน (เหลือน้อยกว่า)</label>
+                <input type="number" id="item-threshold" value="10">
+            </div>
+            <div class="input-group">
+                <label>หน่วย</label>
+                <input type="text" id="item-unit" placeholder="ตัว, แผ่น, ลิตร...">
+            </div>
+            <button class="btn btn-primary" id="btn-add-item">บันทึกพัสดุ</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="alert-summary"></div>
+        <div class="header-top">
+            <h1>จัดการสต็อกวัสดุอุปกรณ์ (Firebase)</h1>
+            <p id="time-status" style="color:#858796; margin: 5px 0;"></p>
+            <div style="display: flex; gap: 15px; font-size: 12px; margin-top: 10px;">
+                <span style="color: var(--primary)">● คลิกชื่อชั้นวางเพื่อแก้ไขหัวข้อ</span>
+                <span style="color: var(--edit-color)">● คลิก ✎ หลังชื่อหรือรหัส เพื่อแก้ไขข้อมูล</span>
+            </div>
+        </div>
+
+        <div id="inventory-root"></div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBkLNYOMDAvdreU4m5VDG3zk0spL-YSPlk",
+        authDomain: "sithikorn-2112.firebaseapp.com",
+        databaseURL: "https://sithikorn-2112-default-rtdb.asia-southeast1.firebasedatabase.app/",
+        projectId: "sithikorn-2112",
+        storageBucket: "sithikorn-2112.firebasestorage.app",
+        messagingSenderId: "208413841145",
+        appId: "1:208413841145:web:1fbca916e0275b580c7428",
+        measurementId: "G-2XY4KMV64T"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const dbRef = ref(database, 'inventory');
+
+    let db = {};
+
+    const defaultData = {
+        "ชั้น A: อะไหล่หม้อแปลง": [
+            { code: "GASK-01", name: "ซีลยางฝาถัง", qty: 120, unit: "แผ่น", threshold: 100 },
+            { code: "NUT-M12", name: "น็อตตัวเมีย M12", qty: 45, unit: "ตัว", threshold: 100 }
+        ]
+    };
+
+    function saveToFirebase(newData) {
+        set(dbRef, newData);
+    }
+
+    onValue(dbRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            db = data;
+        } else {
+            db = defaultData;
+            saveToFirebase(db);
+        }
+        render();
+    });
+
+    function render() {
+        const root = document.getElementById('inventory-root');
+        const select = document.getElementById('select-shelf');
+        const currentSelectedShelf = select.value;
+
+        root.innerHTML = ''; select.innerHTML = '';
+
+        Object.keys(db).forEach(shelfName => {
+            let opt = document.createElement('option');
+            opt.value = shelfName; opt.textContent = shelfName;
+            select.appendChild(opt);
+
+            const section = document.createElement('div');
+            section.className = 'shelf-block';
+            
+            let itemsHtml = '';
+            let items = db[shelfName] || [];
+            
+            items = items.filter(item => item !== null);
+
+            const isPlaceholderShelf = items.length === 1 && items[0].isPlaceholder;
+
+            if (!isPlaceholderShelf) {
+                items.forEach((item, idx) => {
+                    const isLow = item.qty < item.threshold;
+                    const itemCode = item.code ? item.code : '-';
+
+                    itemsHtml += `
+                    <div class="card ${isLow ? 'low-stock-alert' : ''}" id="card-${shelfName}-${idx}">
+                        ${isLow ? `<span class="alert-badge">⚠️ สินค้าใกล้หมด</span>` : ''}
+                        <div class="item-header">
+                            <div style="display: flex; flex-direction: column; max-width: 80%;">
+                                <!-- เพิ่มปุ่ม ✎ สำหรับแก้ไขรหัสวัสดุตรงนี้ -->
+                                <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 2px;">
+                                    <span style="font-size: 11px; color: #858796; font-weight: 600;">รหัส: ${itemCode}</span>
+                                    <button class="btn-edit-code" data-shelf="${shelfName}" data-idx="${idx}" title="แก้ไขรหัสวัสดุ">✎</button>
+                                </div>
+                                <span class="item-name-text">${item.name}</span>
+                            </div>
+                            <button class="btn-edit-name" data-shelf="${shelfName}" data-idx="${idx}" title="แก้ไขชื่อพัสดุ">✎</button>
+                        </div>
+                        <span style="font-size:12px; color:#858796">แจ้งเตือนที่: < ${item.threshold} ${item.unit}</span>
+                        <div class="qty-input-container">
+                            <span style="font-size:13px; font-weight:600">คงเหลือ:</span>
+                            <div>
+                                <input type="number" 
+                                       class="direct-qty-input ${isLow ? 'input-low' : ''}" 
+                                       value="${item.qty}" 
+                                       data-shelf="${shelfName}" data-idx="${idx}"
+                                >
+                                <span style="font-weight:600; font-size:14px; margin-left:5px">${item.unit}</span>
+                            </div>
+                        </div>
+                        <div class="footer-actions">
+                            <button class="btn-sm btn-sm-danger btn-delete-item" data-shelf="${shelfName}" data-idx="${idx}">ลบรายการ</button>
+                        </div>
+                    </div>`;
+                });
+            }
+
+            section.innerHTML = `
+                <div class="shelf-header">
+                    <div class="shelf-title" data-shelf="${shelfName}">
+                        ${shelfName}
+                    </div>
+                    <button class="btn-sm btn-delete-shelf" style="color:var(--danger)" data-shelf="${shelfName}">ลบชั้นวางนี้</button>
+                </div>
+                <div class="grid">${itemsHtml || '<p style="color:#858796; padding-left:10px; grid-column: 1/-1;">ไม่มีพัสดุในชั้นนี้ (สามารถเพิ่มพัสดุจากเมนูด้านซ้ายได้เลย)</p>'}</div>
+            `;
+            root.appendChild(section);
+        });
+
+        if (currentSelectedShelf && db[currentSelectedShelf]) {
+            select.value = currentSelectedShelf;
+        }
+
+        updateAlertSummaryOnly();
+        document.getElementById('time-status').innerText = "ข้อมูลอัปเดตเรียลไทม์ล่าสุด: " + new Date().toLocaleString('th-TH');
+        
+        bindDynamicEvents();
+    }
+
+    function updateAlertSummaryOnly() {
+        const alertSum = document.getElementById('alert-summary');
+        let lowStockItems = [];
+
+        Object.keys(db).forEach(shelfName => {
+            const items = db[shelfName] || [];
+            items.forEach(item => {
+                if(item && !item.isPlaceholder && item.qty < item.threshold) {
+                    lowStockItems.push(`${item.name} (${shelfName})`);
+                }
+            });
+        });
+
+        if(lowStockItems.length > 0) {
+            alertSum.style.display = 'block';
+            alertSum.innerHTML = `⚠️ พบรายการต้องสั่งซื้อเพิ่ม: ${lowStockItems.join(', ')}`;
+        } else {
+            alertSum.style.display = 'none';
+        }
+    }
+
+    function bindDynamicEvents() {
+        document.querySelectorAll('.direct-qty-input').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const shelf = e.target.dataset.shelf;
+                const idx = parseInt(e.target.dataset.idx);
+                const val = parseInt(e.target.value);
+                const currentQty = isNaN(val) ? 0 : val;
+
+                db[shelf][idx].qty = currentQty;
+                saveToFirebase(db); 
+            });
+        });
+
+        document.querySelectorAll('.btn-edit-name').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const shelf = btn.dataset.shelf;
+                const idx = parseInt(btn.dataset.idx);
+                const oldName = db[shelf][idx].name;
+                const newName = prompt("แก้ไขชื่อพัสดุ:", oldName);
+                if (newName && newName.trim() !== "" && newName.trim() !== oldName) {
+                    db[shelf][idx].name = newName.trim();
+                    saveToFirebase(db);
+                }
+            });
+        });
+
+        /* เพิ่ม Event Listener สำหรับปุ่มแก้ไขรหัสวัสดุ */
+        document.querySelectorAll('.btn-edit-code').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const shelf = btn.dataset.shelf;
+                const idx = parseInt(btn.dataset.idx);
+                const oldCode = db[shelf][idx].code || '';
+                const newCode = prompt("แก้ไขรหัสวัสดุ:", oldCode);
+                
+                // ตรวจสอบว่าผู้ใช้ไม่ได้กด Cancel และค่ามีการเปลี่ยนแปลงจริง
+                if (newCode !== null && newCode.trim() !== oldCode) {
+                    db[shelf][idx].code = newCode.trim();
+                    saveToFirebase(db);
+                }
+            });
+        });
+
+        document.querySelectorAll('.shelf-title').forEach(title => {
+            title.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const oldName = title.dataset.shelf;
+                const newName = prompt("แก้ไขชื่อชั้นวาง / หัวข้อ:", oldName);
+                if (!newName || newName.trim() === "" || newName.trim() === oldName) return;
+
+                const cleanName = newName.trim();
+                if (db[cleanName]) { alert("ชื่อชั้นวางนี้มีอยู่แล้ว"); return; }
+                
+                db[cleanName] = db[oldName];
+                delete db[oldName];
+                saveToFirebase(db);
+            });
+        });
+
+        document.querySelectorAll('.btn-delete-item').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const shelf = btn.dataset.shelf;
+                const idx = parseInt(btn.dataset.idx);
+                if(confirm('ยืนยันลบรายการนี้?')) { 
+                    db[shelf].splice(idx, 1); 
+                    if(db[shelf].length === 0) {
+                        db[shelf] = [{ code: "", name: "placeholder", qty: 0, threshold: 0, unit: "", isPlaceholder: true }];
+                    }
+                    saveToFirebase(db);
+                }
+            });
+        });
+
+        document.querySelectorAll('.btn-delete-shelf').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const shelf = btn.dataset.shelf;
+                if(confirm(`ยืนยันที่จะลบ "${shelf}" และพัสดุทั้งหมดในชั้นนี้?`)) { 
+                    delete db[shelf]; 
+                    saveToFirebase(db);
+                } 
+            });
+        });
+    }
+
+    document.getElementById('btn-add-shelf').addEventListener('click', () => {
+        const nameInput = document.getElementById('new-shelf-name');
+        const name = nameInput.value.trim();
+        
+        if(name) { 
+            if(!db[name]) {
+                db[name] = [{ code: "", name: "placeholder", qty: 0, threshold: 0, unit: "", isPlaceholder: true }];
+                nameInput.value = '';
+                saveToFirebase(db); 
+            } else {
+                alert("มีชื่อชั้นวางนี้อยู่แล้วในระบบ");
+            }
+        } else {
+            alert("กรุณากรอกชื่อชั้นวางที่ต้องการเพิ่มก่อนครับ");
+        }
+    });
+
+    document.getElementById('btn-add-item').addEventListener('click', () => {
+        const shelf = document.getElementById('select-shelf').value;
+        const nameInput = document.getElementById('item-name');
+        const codeInput = document.getElementById('item-code'); 
+        const qtyInput = document.getElementById('item-qty');
+        const thresholdInput = document.getElementById('item-threshold');
+        const unitInput = document.getElementById('item-unit');
+
+        const name = nameInput.value.trim();
+        const code = codeInput.value.trim(); 
+        const qty = parseInt(qtyInput.value) || 0;
+        const threshold = parseInt(thresholdInput.value) || 0;
+        const unit = unitInput.value.trim() || 'หน่วย';
+
+        if(shelf && name) {
+            if(!db[shelf] || !Array.isArray(db[shelf])) db[shelf] = [];
+            
+            db[shelf] = db[shelf].filter(item => item && !item.isPlaceholder);
+            
+            db[shelf].push({ code, name, qty, unit, threshold });
+            
+            nameInput.value = '';
+            codeInput.value = ''; 
+            qtyInput.value = '0';
+            unitInput.value = '';
+            saveToFirebase(db);
+        } else {
+            alert("กรุณาเลือกชั้นวางและระบุชื่อพัสดุให้ครบถ้วน");
+        }
+    });
+</script>
+</body>
+</html>
