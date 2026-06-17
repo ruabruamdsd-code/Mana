@@ -48,7 +48,7 @@
         .btn-primary:hover { background: #324bbd; }
 
         /* Main Content Area */
-        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; }
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; display: flex; flex-direction: column; }
 
         #alert-summary {
             display: none; background: #fff1f2; border-left: 5px solid var(--danger);
@@ -117,10 +117,103 @@
         .btn-sm { border: none; background: none; font-size: 12px; cursor: pointer; color: #858796; text-decoration: underline; padding: 0; }
         .btn-sm-danger:hover { color: var(--danger); }
 
+        /* Manager Section */
+        .manager-section {
+            margin-top: auto; /* ดันให้อยู่ด้านล่างสุดของ main-content */
+            padding-top: 50px;
+            border-top: 2px dashed #e3e6f0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .manager-title {
+            color: var(--dark-blue);
+            margin-bottom: 25px;
+            font-size: 22px;
+            font-weight: bold;
+            position: relative;
+            display: inline-block;
+        }
+
+        .manager-title::after {
+            content: '';
+            width: 50%;
+            height: 3px;
+            background: var(--primary);
+            position: absolute;
+            bottom: -8px;
+            left: 25%;
+            border-radius: 2px;
+        }
+
+        .manager-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+            transition: transform 0.3s;
+        }
+
+        .manager-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .manager-img {
+            width: 200px;
+            height: 260px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 6px solid #eef2ff;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 15px rgba(67, 97, 238, 0.2);
+            transition: 0.3s;
+        }
+
+        .manager-img:hover {
+            border-color: var(--primary);
+            box-shadow: 0 12px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .manager-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 24px;
+            color: var(--dark-blue);
+        }
+
+        .manager-info p {
+            margin: 5px 0;
+            color: #858796;
+            font-size: 16px;
+        }
+
+        .manager-badge {
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .manager-contact {
+            margin-top: 20px !important;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
+            font-weight: 600;
+            color: var(--dark-blue) !important;
+        }
+
         @media (max-width: 992px) {
             .sidebar { width: 100%; height: auto; position: relative; }
             .main-content { margin-left: 0; padding: 20px; }
             body { flex-direction: column; }
+            .manager-img { width: 160px; height: 208px; }
         }
     </style>
 </head>
@@ -166,17 +259,34 @@
     </div>
 
     <div class="main-content">
-        <div id="alert-summary"></div>
-        <div class="header-top">
-            <h1>จัดการสต็อกวัสดุอุปกรณ์ (Firebase)</h1>
-            <p id="time-status" style="color:#858796; margin: 5px 0;"></p>
-            <div style="display: flex; gap: 15px; font-size: 12px; margin-top: 10px;">
-                <span style="color: var(--primary)">● คลิกชื่อชั้นวางเพื่อแก้ไขหัวข้อ</span>
-                <span style="color: var(--edit-color)">● คลิก ✎ หลังชื่อหรือรหัส เพื่อแก้ไขข้อมูล</span>
+        <div>
+            <div id="alert-summary"></div>
+            <div class="header-top">
+                <h1>จัดการสต็อกวัสดุอุปกรณ์ (Firebase)</h1>
+                <p id="time-status" style="color:#858796; margin: 5px 0;"></p>
+                <div style="display: flex; gap: 15px; font-size: 12px; margin-top: 10px;">
+                    <span style="color: var(--primary)">● คลิกชื่อชั้นวางเพื่อแก้ไขหัวข้อ</span>
+                    <span style="color: var(--edit-color)">● คลิก ✎ หลังชื่อหรือรหัส เพื่อแก้ไขข้อมูล</span>
+                </div>
             </div>
+
+            <div id="inventory-root"></div>
         </div>
 
-        <div id="inventory-root"></div>
+        <!-- Manager Section ที่เพิ่มใหม่ -->
+        <div class="manager-section">
+            <h2 class="manager-title">ผู้จัดการโรงซ่อม</h2>
+            <div class="manager-card">
+                <!-- สามารถเปลี่ยน URL รูปภาพด้านล่างเป็นรูปของผู้จัดการตัวจริงได้ครับ -->
+                <img src="https://cdn.discordapp.com/attachments/1516804516111187990/1516835034835845170/a220df797db5f1b5.png?ex=6a341635&is=6a32c4b5&hm=505054485c340e5edd2236a32e44700dfb7ec5e6162d5a351cb4f8bf42a00261&" alt="ผู้จัดการโรงซ่อม" class="manager-img">
+                <div class="manager-info">
+                    <h3>อาริว สยิวกิ้ว</h3>
+                    <div class="manager-badge">ผู้จัดการโรงซ่อมหม้อแปลง</div>
+                    <p>รับผิดชอบดูแลและอนุมัติการเบิกจ่ายอะไหล่</p>
+                    <p class="manager-contact">📞 081-234-5678 &nbsp;|&nbsp; ✉️ manager@factory.com</p>
+                </div>
+            </div>
+        </div>
     </div>
 
 <script type="module">
