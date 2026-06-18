@@ -14,6 +14,7 @@
             --danger: #ef4444;
             --dark-blue: #2e3b4e;
             --edit-color: #f59e0b;
+            --success: #10b981;
         }
 
         * { box-sizing: border-box; }
@@ -87,7 +88,6 @@
         .item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
         .item-name-text { font-weight: bold; font-size: 16px; color: var(--dark-blue); max-width: 100%; }
         
-        /* ปรับสไตล์ปุ่มแก้ไขให้ใช้ร่วมกันได้ทั้งชื่อและรหัส */
         .btn-edit-name, .btn-edit-code { 
             background: none; border: none; cursor: pointer; color: var(--edit-color); padding: 0;
             opacity: 0.6; transition: 0.2s;
@@ -117,107 +117,189 @@
         .btn-sm { border: none; background: none; font-size: 12px; cursor: pointer; color: #858796; text-decoration: underline; padding: 0; }
         .btn-sm-danger:hover { color: var(--danger); }
 
-        /* Manager Section */
-        .manager-section {
-            margin-top: auto; /* ดันให้อยู่ด้านล่างสุดของ main-content */
+        /* Management Section (ทีมงานผู้ดูแลและที่ปรึกษา) */
+        .management-section {
+            margin-top: auto; 
             padding-top: 50px;
             border-top: 2px dashed #e3e6f0;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
-        .manager-title {
+        .management-title {
             color: var(--dark-blue);
-            margin-bottom: 25px;
-            font-size: 22px;
+            margin-bottom: 30px;
+            font-size: 24px;
             font-weight: bold;
             position: relative;
             display: inline-block;
         }
 
-        .manager-title::after {
+        .management-title::after {
             content: '';
-            width: 50%;
+            width: 60%;
             height: 3px;
             background: var(--primary);
             position: absolute;
             bottom: -8px;
-            left: 25%;
+            left: 20%;
             border-radius: 2px;
         }
 
-        .manager-card {
+        /* จัดวาง Grid ของผู้ดูแลแบบ Responsive */
+        .management-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .profile-card {
             background: var(--white);
             border-radius: 20px;
-            padding: 40px 30px;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-            max-width: 500px;
-            width: 100%;
-            transition: transform 0.3s;
+            padding: 35px 25px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08);
+            max-width: 440px;
+            flex: 1 1 340px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .manager-card:hover {
+        .profile-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 15px 30px -5px rgba(0,0,0,0.15);
         }
 
-        .manager-img {
-            width: 200px;
-            height: 260px;
+        .profile-img {
+            width: 160px;
+            height: 200px;
             object-fit: cover;
             border-radius: 12px;
             border: 6px solid #eef2ff;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 15px rgba(67, 97, 238, 0.2);
+            margin-bottom: 20px;
+            box-shadow: 0 8px 15px rgba(67, 97, 238, 0.15);
             transition: 0.3s;
         }
 
-        .manager-img:hover {
+        .profile-card:hover .profile-img {
             border-color: var(--primary);
-            box-shadow: 0 12px 20px rgba(67, 97, 238, 0.3);
         }
 
-        .manager-info h3 {
+        /* ปรับสีที่ปรึกษาให้มีขอบสีเหลือง/ทองเพื่อความพรีเมียม */
+        .profile-card.advisor-card:hover .profile-img {
+            border-color: var(--edit-color);
+        }
+
+        .profile-info h3 {
             margin: 0 0 5px 0;
-            font-size: 24px;
+            font-size: 22px;
             color: var(--dark-blue);
         }
 
-        .manager-info p {
+        .profile-info p {
             margin: 5px 0;
             color: #858796;
-            font-size: 16px;
+            font-size: 15px;
         }
 
-        .manager-badge {
+        .profile-badge {
             background: #eef2ff;
             color: var(--primary);
             padding: 5px 15px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             display: inline-block;
-            margin: 10px 0;
+            margin: 8px 0;
         }
 
-        .manager-contact {
-            margin-top: 20px !important;
+        /* สไตล์ Badge พิเศษสำหรับที่ปรึกษา */
+        .profile-badge.advisor-badge {
+            background: #fffbeb;
+            color: var(--edit-color);
+        }
+
+        .profile-contact {
+            margin-top: 15px !important;
             padding-top: 15px;
             border-top: 1px solid #f1f5f9;
             font-weight: 600;
             color: var(--dark-blue) !important;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        /* Modern UI Popups (Custom Modal & Toast แทน Alert ดั้งเดิม) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(46, 59, 78, 0.6); display: flex; align-items: center; justify-content: center;
+            z-index: 1000; transition: opacity 0.2s ease-out;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: var(--white); padding: 30px; border-radius: 16px; width: 90%; max-width: 420px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            animation: scaleUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes scaleUp {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-content h3 { margin-top: 0; color: var(--dark-blue); font-size: 20px; margin-bottom: 15px; }
+        .modal-content input { margin-bottom: 15px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        .modal-actions button {
+            padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;
+            transition: 0.2s;
+        }
+        .btn-modal-cancel { background: #e3e6f0; color: #4e73df; }
+        .btn-modal-cancel:hover { background: #d1d3e2; }
+        .btn-modal-confirm { background: var(--primary); color: white; }
+        .btn-modal-confirm:hover { background: #324bbd; }
+        .btn-modal-confirm.danger { background: var(--danger); }
+        .btn-modal-confirm.danger:hover { background: #dc2626; }
+
+        /* Custom Toast Notification */
+        #custom-toast {
+            display: none; position: fixed; bottom: 20px; right: 20px; 
+            background: #2e3b4e; color: white; padding: 12px 24px; border-radius: 10px; 
+            z-index: 1100; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
+            font-weight: 600; font-size: 14px; transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            transform: translateY(100px); opacity: 0;
+            display: flex; align-items: center; gap: 8px;
         }
 
         @media (max-width: 992px) {
             .sidebar { width: 100%; height: auto; position: relative; }
             .main-content { margin-left: 0; padding: 20px; }
             body { flex-direction: column; }
-            .manager-img { width: 160px; height: 208px; }
+            .profile-img { width: 140px; height: 180px; }
+            .management-grid { flex-direction: column; align-items: center; }
+            .profile-card { max-width: 100%; }
         }
     </style>
 </head>
 <body>
+
+    <!-- คลังแสงแจ้งเตือน Pop-up ด่วนระดับพรีเมียม -->
+    <div id="custom-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <h3 id="modal-title">ข้อมูลยืนยัน</h3>
+            <div id="modal-body-container">
+                <!-- เนื้อหา Dynamic -->
+            </div>
+            <div class="modal-actions">
+                <button id="modal-btn-cancel" class="btn-modal-cancel">ยกเลิก</button>
+                <button id="modal-btn-confirm" class="btn-modal-confirm">ตกลง</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast แจ้งเตือนสถานะสำเร็จ/ล้มเหลว -->
+    <div id="custom-toast"></div>
 
     <div class="sidebar">
         <h2 style="color:var(--primary)">📦 Inventory System</h2>
@@ -273,18 +355,34 @@
             <div id="inventory-root"></div>
         </div>
 
-        <!-- Manager Section ที่เพิ่มใหม่ -->
-        <div class="manager-section">
-            <h2 class="manager-title">ผู้จัดการโรงซ่อม</h2>
-            <div class="manager-card">
-                <!-- สามารถเปลี่ยน URL รูปภาพด้านล่างเป็นรูปของผู้จัดการตัวจริงได้ครับ -->
-                <img src="https://cdn.discordapp.com/attachments/1516804516111187990/1516835034835845170/a220df797db5f1b5.png?ex=6a341635&is=6a32c4b5&hm=505054485c340e5edd2236a32e44700dfb7ec5e6162d5a351cb4f8bf42a00261&" alt="ผู้จัดการโรงซ่อม" class="manager-img">
-                <div class="manager-info">
-                    <h3>อาริว สยิวกิ้ว</h3>
-                    <div class="manager-badge">ผู้จัดการโรงซ่อมหม้อแปลง</div>
-                    <p>รับผิดชอบดูแลและอนุมัติการเบิกจ่ายอะไหล่</p>
-                    <p class="manager-contact">📞 081-234-5678 &nbsp;|&nbsp; ✉️ manager@factory.com</p>
+        <!-- Management Section: คณะผู้ดูแลโรงซ่อมและที่ปรึกษาที่จัดวางแบบสมมาตรใหม่ -->
+        <div class="management-section">
+            <h2 class="management-title">ผู้ดูแลและคณะที่ปรึกษาโรงซ่อม</h2>
+            <div class="management-grid">
+                
+                <!-- การ์ดผู้จัดการ (ด้านซ้าย) -->
+                <div class="profile-card">
+                    <img src="https://cdn.discordapp.com/attachments/1516804516111187990/1516835034835845170/a220df797db5f1b5.png?ex=6a341635&is=6a32c4b5&hm=505054485c340e5edd2236a32e44700dfb7ec5e6162d5a351cb4f8bf42a00261&" onerror="this.src='https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=300&q=80'" alt="ผู้จัดการโรงซ่อม" class="profile-img">
+                    <div class="profile-info">
+                        <h3>อาริว สยิวกิ้ว</h3>
+                        <div class="profile-badge">ผู้จัดการโรงซ่อมหม้อแปลง</div>
+                        <p>รับผิดชอบดูแลการทำงานและอนุมัติการเบิกจ่ายอะไหล่ทั้งหมด</p>
+                        <p class="profile-contact">📞 081-234-5678 &nbsp;|&nbsp; ✉️ manager@factory.com</p>
+                    </div>
                 </div>
+
+                <!-- การ์ดที่ปรึกษาที่เพิ่มใหม่ (ด้านขวา) -->
+                <div class="profile-card advisor-card">
+                    <!-- คุณสามารถอัปเกรด URL รูปภาพของที่ปรึกษาจริงได้ที่นี่ -->
+                    <img src="https://media.discordapp.net/attachments/1516804516111187990/1517111124024365267/1.png?ex=6a351756&is=6a33c5d6&hm=511657f54373309dffa6b04c82302efce7ff2b850a3b831c7b8b04db384d9590&=&format=webp&quality=lossless&width=532&height=648" onerror="this.src='https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=300&q=80'" alt="ที่ปรึกษาโรงซ่อม" class="profile-img">
+                    <div class="profile-info">
+                        <h3>พีพรี่</h3>
+                        <div class="profile-badge advisor-badge">ที่ปรึกษาพิเศษด้านวิศวกรรมและการซ่อมบำรุง</div>
+                        <p>ให้คำปรึกษาเชิงลึกด้านเทคนิค การจัดการ และการทดสอบหม้อแปลงไฟฟ้า</p>
+                        <p class="profile-contact">📞 089-765-4321 &nbsp;|&nbsp; ✉️ somchai.l@factory.com</p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -317,6 +415,87 @@
         ]
     };
 
+    /* ระบบแจ้งเตือนแจ้งสถานะ Toast สวยงามแทน Alert แบบเดิม */
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('custom-toast');
+        toast.textContent = message;
+        toast.style.display = 'flex';
+        
+        if (type === 'danger') {
+            toast.style.background = 'var(--danger)';
+        } else if (type === 'warning') {
+            toast.style.background = 'var(--edit-color)';
+        } else {
+            toast.style.background = 'var(--success)';
+        }
+        
+        setTimeout(() => {
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+        }, 10);
+        
+        setTimeout(() => {
+            toast.style.transform = 'translateY(100px)';
+            toast.style.opacity = '0';
+            setTimeout(() => { toast.style.display = 'none'; }, 300);
+        }, 3000);
+    }
+
+    /* กล่องข้อความยืนยัน Premium Modal ทดแทน Confirm และ Prompt */
+    function openModal(options) {
+        const modal = document.getElementById('custom-modal');
+        const titleEl = document.getElementById('modal-title');
+        const bodyEl = document.getElementById('modal-body-container');
+        const btnCancel = document.getElementById('modal-btn-cancel');
+        const btnConfirm = document.getElementById('modal-btn-confirm');
+
+        titleEl.textContent = options.title || 'ยืนยันการดำเนินการ';
+        bodyEl.innerHTML = '';
+        
+        if (options.type === 'prompt') {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = options.defaultValue || '';
+            input.id = 'modal-input-field';
+            bodyEl.appendChild(input);
+            setTimeout(() => input.focus(), 100);
+        } else {
+            const text = document.createElement('p');
+            text.textContent = options.message || '';
+            text.style.margin = '0';
+            bodyEl.appendChild(text);
+        }
+
+        if (options.isDanger) {
+            btnConfirm.className = 'btn-modal-confirm danger';
+        } else {
+            btnConfirm.className = 'btn-modal-confirm';
+        }
+
+        modal.style.display = 'flex';
+
+        const cleanUp = () => {
+            modal.style.display = 'none';
+            btnConfirm.replaceWith(btnConfirm.cloneNode(true));
+            btnCancel.replaceWith(btnCancel.cloneNode(true));
+        };
+
+        document.getElementById('modal-btn-confirm').addEventListener('click', () => {
+            let result = true;
+            if (options.type === 'prompt') {
+                const inputVal = document.getElementById('modal-input-field').value;
+                result = inputVal;
+            }
+            cleanUp();
+            if (options.onConfirm) options.onConfirm(result);
+        });
+
+        document.getElementById('modal-btn-cancel').addEventListener('click', () => {
+            cleanUp();
+            if (options.onCancel) options.onCancel();
+        });
+    }
+
     function saveToFirebase(newData) {
         set(dbRef, newData);
     }
@@ -335,7 +514,7 @@
     function render() {
         const root = document.getElementById('inventory-root');
         const select = document.getElementById('select-shelf');
-        const currentSelectedShelf = select.value;
+        let currentSelectedShelf = select.value;
 
         root.innerHTML = ''; select.innerHTML = '';
 
@@ -364,7 +543,6 @@
                         ${isLow ? `<span class="alert-badge">⚠️ สินค้าใกล้หมด</span>` : ''}
                         <div class="item-header">
                             <div style="display: flex; flex-direction: column; max-width: 80%;">
-                                <!-- เพิ่มปุ่ม ✎ สำหรับแก้ไขรหัสวัสดุตรงนี้ -->
                                 <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 2px;">
                                     <span style="font-size: 11px; color: #858796; font-weight: 600;">รหัส: ${itemCode}</span>
                                     <button class="btn-edit-code" data-shelf="${shelfName}" data-idx="${idx}" title="แก้ไขรหัสวัสดุ">✎</button>
@@ -444,7 +622,8 @@
                 const currentQty = isNaN(val) ? 0 : val;
 
                 db[shelf][idx].qty = currentQty;
-                saveToFirebase(db); 
+                saveToFirebase(db);
+                showToast(`อัปเดตจำนวน ${db[shelf][idx].name} เป็น ${currentQty} ${db[shelf][idx].unit} แล้ว`, 'success');
             });
         });
 
@@ -454,28 +633,41 @@
                 const shelf = btn.dataset.shelf;
                 const idx = parseInt(btn.dataset.idx);
                 const oldName = db[shelf][idx].name;
-                const newName = prompt("แก้ไขชื่อพัสดุ:", oldName);
-                if (newName && newName.trim() !== "" && newName.trim() !== oldName) {
-                    db[shelf][idx].name = newName.trim();
-                    saveToFirebase(db);
-                }
+                
+                openModal({
+                    title: 'แก้ไขชื่อพัสดุ',
+                    type: 'prompt',
+                    defaultValue: oldName,
+                    onConfirm: (newName) => {
+                        if (newName && newName.trim() !== "" && newName.trim() !== oldName) {
+                            db[shelf][idx].name = newName.trim();
+                            saveToFirebase(db);
+                            showToast('แก้ไขชื่อพัสดุสำเร็จ', 'success');
+                        }
+                    }
+                });
             });
         });
 
-        /* เพิ่ม Event Listener สำหรับปุ่มแก้ไขรหัสวัสดุ */
         document.querySelectorAll('.btn-edit-code').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const shelf = btn.dataset.shelf;
                 const idx = parseInt(btn.dataset.idx);
                 const oldCode = db[shelf][idx].code || '';
-                const newCode = prompt("แก้ไขรหัสวัสดุ:", oldCode);
-                
-                // ตรวจสอบว่าผู้ใช้ไม่ได้กด Cancel และค่ามีการเปลี่ยนแปลงจริง
-                if (newCode !== null && newCode.trim() !== oldCode) {
-                    db[shelf][idx].code = newCode.trim();
-                    saveToFirebase(db);
-                }
+
+                openModal({
+                    title: 'แก้ไขรหัสวัสดุ',
+                    type: 'prompt',
+                    defaultValue: oldCode,
+                    onConfirm: (newCode) => {
+                        if (newCode !== null && newCode.trim() !== oldCode) {
+                            db[shelf][idx].code = newCode.trim();
+                            saveToFirebase(db);
+                            showToast('แก้ไขรหัสวัสดุสำเร็จ', 'success');
+                        }
+                    }
+                });
             });
         });
 
@@ -483,15 +675,26 @@
             title.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const oldName = title.dataset.shelf;
-                const newName = prompt("แก้ไขชื่อชั้นวาง / หัวข้อ:", oldName);
-                if (!newName || newName.trim() === "" || newName.trim() === oldName) return;
 
-                const cleanName = newName.trim();
-                if (db[cleanName]) { alert("ชื่อชั้นวางนี้มีอยู่แล้ว"); return; }
-                
-                db[cleanName] = db[oldName];
-                delete db[oldName];
-                saveToFirebase(db);
+                openModal({
+                    title: 'แก้ไขชื่อชั้นวาง / หัวข้อ',
+                    type: 'prompt',
+                    defaultValue: oldName,
+                    onConfirm: (newName) => {
+                        if (!newName || newName.trim() === "" || newName.trim() === oldName) return;
+                        const cleanName = newName.trim();
+                        
+                        if (db[cleanName]) { 
+                            showToast('ชื่อชั้นวางนี้มีอยู่แล้วในระบบ', 'warning'); 
+                            return; 
+                        }
+                        
+                        db[cleanName] = db[oldName];
+                        delete db[oldName];
+                        saveToFirebase(db);
+                        showToast('แก้ไขชื่อชั้นวางสำเร็จ', 'success');
+                    }
+                });
             });
         });
 
@@ -500,13 +703,20 @@
                 e.stopPropagation();
                 const shelf = btn.dataset.shelf;
                 const idx = parseInt(btn.dataset.idx);
-                if(confirm('ยืนยันลบรายการนี้?')) { 
-                    db[shelf].splice(idx, 1); 
-                    if(db[shelf].length === 0) {
-                        db[shelf] = [{ code: "", name: "placeholder", qty: 0, threshold: 0, unit: "", isPlaceholder: true }];
+                
+                openModal({
+                    title: 'ยืนยันลบพัสดุ',
+                    message: `คุณแน่ใจหรือไม่ที่จะลบรายการ "${db[shelf][idx].name}" ออกจากระบบ?`,
+                    isDanger: true,
+                    onConfirm: () => {
+                        db[shelf].splice(idx, 1); 
+                        if(db[shelf].length === 0) {
+                            db[shelf] = [{ code: "", name: "placeholder", qty: 0, threshold: 0, unit: "", isPlaceholder: true }];
+                        }
+                        saveToFirebase(db);
+                        showToast('ลบรายการพัสดุเสร็จสิ้น', 'danger');
                     }
-                    saveToFirebase(db);
-                }
+                });
             });
         });
 
@@ -514,10 +724,17 @@
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const shelf = btn.dataset.shelf;
-                if(confirm(`ยืนยันที่จะลบ "${shelf}" และพัสดุทั้งหมดในชั้นนี้?`)) { 
-                    delete db[shelf]; 
-                    saveToFirebase(db);
-                } 
+                
+                openModal({
+                    title: 'ลบชั้นวางพัสดุ',
+                    message: `ยืนยันที่จะลบชั้นวาง "${shelf}" และข้อมูลพัสดุทั้งหมดในชั้นนี้?`,
+                    isDanger: true,
+                    onConfirm: () => {
+                        delete db[shelf]; 
+                        saveToFirebase(db);
+                        showToast(`ลบชั้นวาง "${shelf}" สำเร็จแล้ว`, 'danger');
+                    }
+                });
             });
         });
     }
@@ -531,11 +748,12 @@
                 db[name] = [{ code: "", name: "placeholder", qty: 0, threshold: 0, unit: "", isPlaceholder: true }];
                 nameInput.value = '';
                 saveToFirebase(db); 
+                showToast(`สร้างชั้นวาง "${name}" เรียบร้อยแล้ว`, 'success');
             } else {
-                alert("มีชื่อชั้นวางนี้อยู่แล้วในระบบ");
+                showToast("มีชื่อชั้นวางนี้อยู่แล้วในระบบ", "warning");
             }
         } else {
-            alert("กรุณากรอกชื่อชั้นวางที่ต้องการเพิ่มก่อนครับ");
+            showToast("กรุณากรอกชื่อชั้นวางที่ต้องการเพิ่ม", "warning");
         }
     });
 
@@ -557,16 +775,17 @@
             if(!db[shelf] || !Array.isArray(db[shelf])) db[shelf] = [];
             
             db[shelf] = db[shelf].filter(item => item && !item.isPlaceholder);
-            
             db[shelf].push({ code, name, qty, unit, threshold });
             
             nameInput.value = '';
             codeInput.value = ''; 
             qtyInput.value = '0';
             unitInput.value = '';
+            
             saveToFirebase(db);
+            showToast(`เพิ่มพัสดุ "${name}" สำเร็จ`, 'success');
         } else {
-            alert("กรุณาเลือกชั้นวางและระบุชื่อพัสดุให้ครบถ้วน");
+            showToast("กรุณาเลือกชั้นวางและกรอกชื่อพัสดุให้ครบถ้วน", "warning");
         }
     });
 </script>
